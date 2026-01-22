@@ -18,10 +18,15 @@ let package = Package(
         )
     ],
     dependencies: [
+        // Text processing operates on strings
+        .package(path: "../swift-string-primitives"),
     ],
     targets: [
         .target(
-            name: "Text Primitives"
+            name: "Text Primitives",
+            dependencies: [
+                .product(name: "String Primitives", package: "swift-string-primitives"),
+            ]
         )
     ],
     swiftLanguageModes: [.v6]
