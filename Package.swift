@@ -15,7 +15,11 @@ let package = Package(
         .library(
             name: "Text Primitives",
             targets: ["Text Primitives"]
-        )
+        ),
+        .library(
+            name: "Text Primitives Test Support",
+            targets: ["Text Primitives Test Support"]
+        ),
     ],
     dependencies: [
         // Text processing operates on strings
@@ -27,7 +31,14 @@ let package = Package(
             dependencies: [
                 .product(name: "String Primitives", package: "swift-string-primitives"),
             ]
-        )
+        ),
+        .target(
+            name: "Text Primitives Test Support",
+            dependencies: [
+                "Text Primitives",
+            ],
+            path: "Tests/Support"
+        ),
     ],
     swiftLanguageModes: [.v6]
 )
