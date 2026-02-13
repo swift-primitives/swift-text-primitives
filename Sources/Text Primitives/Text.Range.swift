@@ -24,10 +24,10 @@ extension Text {
     /// ## Usage
     ///
     /// ```swift
-    /// let range = Text.Range(start: Text.Position(10), end: Text.Position(25))
-    /// range.count    // 15
+    /// let range = Text.Range(start: Text.Position(42), end: Text.Position(57))
+    /// range.count    // Text.Count(15)
     /// range.isEmpty  // false
-    /// range.contains(Text.Position(15))  // true
+    /// range.contains(Text.Position(50))  // true
     /// ```
     public struct Range: Sendable, Equatable, Hashable {
         /// The inclusive start position (first byte in the range).
@@ -55,7 +55,9 @@ extension Text {
         @inlinable
         public init(start: Text.Position, count: Text.Count) {
             self.start = start
-            self.end = start + count
+            // Safe: adding a non-negative cardinal to a position cannot underflow.
+            // Overflow is theoretically possible but not for text-sized inputs.
+            self.end = try! start + Text.Offset(count)
         }
     }
 }
@@ -66,7 +68,8 @@ extension Text.Range {
     /// The number of bytes in this range.
     @inlinable
     public var count: Text.Count {
-        Text.Count(start.distance(to: end))
+        // Safe: start <= end invariant guarantees non-negative, representable result.
+        Text.Count(__unchecked: (), try! end - start)
     }
 
     /// Whether this range contains zero bytes.
@@ -89,6 +92,6 @@ extension Text.Range {
 extension Text.Range: CustomStringConvertible {
     @inlinable
     public var description: Swift.String {
-        "\(start.rawValue)..<\(end.rawValue)"
+        "\(start)..<\(end)"
     }
 }

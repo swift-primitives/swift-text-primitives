@@ -19,96 +19,10 @@ extension Text {
     /// swift-syntax) use byte offsets as their primary position representation,
     /// with line/column derived lazily via line maps.
     ///
-    /// ## Usage
-    ///
-    /// ```swift
-    /// let start = Text.Position.zero
-    /// let end = Text.Position(42)
-    /// let range = Text.Range(start: start, end: end)
-    /// ```
-    ///
-    /// ## Design
-    ///
-    /// - Backed by `Int` for consistency with Swift Standard Library conventions
-    ///   (Array.count, String.utf8.count, etc. are all `Int`).
-    /// - `Sendable`, `Equatable`, `Hashable`, `Comparable` — suitable for use
-    ///   as dictionary keys, sorted collection elements, and cross-isolation transfer.
-    public struct Position: Sendable, Equatable, Hashable, Comparable {
-        /// The zero-based byte offset.
-        public let rawValue: Int
-
-        /// Creates a position from a byte offset.
-        ///
-        /// - Parameter rawValue: The zero-based byte offset. Must be non-negative.
-        @inlinable
-        public init(_ rawValue: Int) {
-            self.rawValue = rawValue
-        }
-
-        /// The start of text (byte offset zero).
-        @inlinable
-        public static var zero: Text.Position {
-            Text.Position(0)
-        }
-
-        // MARK: - Comparable
-
-        @inlinable
-        public static func < (lhs: Text.Position, rhs: Text.Position) -> Bool {
-            lhs.rawValue < rhs.rawValue
-        }
-    }
-}
-
-// MARK: - Arithmetic
-
-extension Text.Position {
-    /// Returns the byte displacement from this position to `other`.
-    ///
-    /// - Parameter other: The target position.
-    /// - Returns: A positive offset if `other` is after `self`, negative if before.
-    @inlinable
-    public func distance(to other: Text.Position) -> Text.Offset {
-        Text.Offset(other.rawValue - self.rawValue)
-    }
-
-    /// Returns a new position advanced by the given offset.
-    ///
-    /// - Parameter offset: The byte displacement to apply.
-    /// - Returns: The new position.
-    @inlinable
-    public func advanced(by offset: Text.Offset) -> Text.Position {
-        Text.Position(rawValue + offset.rawValue)
-    }
-}
-
-// MARK: - Operators
-
-extension Text.Position {
-    /// Advances a position by a typed byte offset.
-    @inlinable
-    public static func + (lhs: Text.Position, rhs: Text.Offset) -> Text.Position {
-        lhs.advanced(by: rhs)
-    }
-
-    /// Advances a position by a typed byte count.
-    @inlinable
-    public static func + (lhs: Text.Position, rhs: Text.Count) -> Text.Position {
-        Text.Position(lhs.rawValue + rhs.rawValue)
-    }
-
-    /// Returns the typed byte displacement between two positions.
-    @inlinable
-    public static func - (lhs: Text.Position, rhs: Text.Position) -> Text.Offset {
-        rhs.distance(to: lhs)
-    }
-}
-
-// MARK: - CustomStringConvertible
-
-extension Text.Position: CustomStringConvertible {
-    @inlinable
-    public var description: Swift.String {
-        "\(rawValue)"
-    }
+    /// Built on `Tagged<Text, Ordinal>`, inheriting:
+    /// - `Sendable`, `Equatable`, `Hashable`, `Comparable`
+    /// - `.zero` static property
+    /// - Affine arithmetic with ``Text/Offset``
+    /// - `retag(_:)` for zero-cost cross-domain conversion
+    public typealias Position = Tagged<Text, Ordinal>
 }

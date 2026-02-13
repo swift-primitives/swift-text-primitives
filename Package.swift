@@ -22,20 +22,20 @@ let package = Package(
         ),
     ],
     dependencies: [
-        // Text processing operates on strings
-        .package(path: "../swift-string-primitives"),
+        .package(path: "../swift-affine-primitives"),
     ],
     targets: [
         .target(
             name: "Text Primitives",
             dependencies: [
-                .product(name: "String Primitives", package: "swift-string-primitives"),
+                .product(name: "Affine Primitives", package: "swift-affine-primitives"),
             ]
         ),
         .target(
             name: "Text Primitives Test Support",
             dependencies: [
                 "Text Primitives",
+                .product(name: "Affine Primitives Test Support", package: "swift-affine-primitives"),
             ],
             path: "Tests/Support"
         ),
