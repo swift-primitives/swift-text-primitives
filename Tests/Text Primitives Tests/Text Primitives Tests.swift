@@ -256,3 +256,280 @@ struct TextRangeTests {
         #expect(range.end == .zero)
     }
 }
+
+// MARK: - Text.Line.Number
+
+@Suite("Text.Line.Number")
+struct TextLineNumberTests {
+    @Test("init from UInt")
+    func initFromUInt() {
+        let number = Text.Line.Number(1)
+        #expect(number.rawValue == 1)
+    }
+
+    @Test("literal construction")
+    func literalConstruction() {
+        let number: Text.Line.Number = 42
+        #expect(number.rawValue == 42)
+    }
+
+    @Test("init from Int — valid")
+    func initFromIntValid() throws {
+        let value: Int = 5
+        let number = try Text.Line.Number(value)
+        #expect(number.rawValue == 5)
+    }
+
+    @Test("init from Int — zero")
+    func initFromIntZero() throws {
+        let value: Int = 0
+        let number = try Text.Line.Number(value)
+        #expect(number.rawValue == 0)
+    }
+
+    @Test("init from Int — negative throws")
+    func initFromIntNegativeThrows() {
+        let value: Int = -1
+        #expect(throws: Text.Line.Number.Error.negativeSource(-1)) {
+            try Text.Line.Number(value)
+        }
+    }
+
+    @Test("init exactly — valid")
+    func initExactlyValid() {
+        let value: Int = 5
+        let number = Text.Line.Number(exactly: value)
+        #expect(number?.rawValue == 5)
+    }
+
+    @Test("init exactly — negative returns nil")
+    func initExactlyNegative() {
+        let value: Int = -1
+        #expect(Text.Line.Number(exactly: value) == nil)
+    }
+
+    @Test("comparable")
+    func comparable() {
+        let a: Text.Line.Number = 1
+        let b: Text.Line.Number = 10
+        #expect(a < b)
+        #expect(b > a)
+        #expect(a <= a)
+    }
+
+    @Test("equatable")
+    func equatable() {
+        let a: Text.Line.Number = 5
+        let b: Text.Line.Number = 5
+        let c: Text.Line.Number = 6
+        #expect(a == b)
+        #expect(a != c)
+    }
+
+    @Test("hashable")
+    func hashable() {
+        let a: Text.Line.Number = 5
+        let b: Text.Line.Number = 5
+        var set: Set<Text.Line.Number> = [a, b]
+        #expect(set.count == 1)
+        set.insert(10)
+        #expect(set.count == 2)
+    }
+
+    @Test("description")
+    func description() {
+        let number: Text.Line.Number = 42
+        #expect(number.description == "42")
+    }
+
+}
+
+// MARK: - Text.Location
+
+@Suite("Text.Location")
+struct TextLocationTests {
+    @Test("init from line and column")
+    func initLineColumn() {
+        let location = Text.Location(
+            line: 5,
+            column: Text.Line.Column(__unchecked: (), Cardinal(10))
+        )
+        #expect(location.line == 5)
+        #expect(location.column == 10)
+    }
+
+    @Test("description is line:column")
+    func description() {
+        let location = Text.Location(
+            line: 42,
+            column: Text.Line.Column(__unchecked: (), Cardinal(17))
+        )
+        #expect(location.description == "42:17")
+    }
+
+    @Test("comparable — different lines")
+    func comparableDifferentLines() {
+        let a = Text.Location(
+            line: 1,
+            column: Text.Line.Column(__unchecked: (), Cardinal(99))
+        )
+        let b = Text.Location(
+            line: 2,
+            column: Text.Line.Column(__unchecked: (), Cardinal(1))
+        )
+        #expect(a < b)
+    }
+
+    @Test("comparable — same line, different columns")
+    func comparableSameLineDifferentColumns() {
+        let a = Text.Location(
+            line: 5,
+            column: Text.Line.Column(__unchecked: (), Cardinal(1))
+        )
+        let b = Text.Location(
+            line: 5,
+            column: Text.Line.Column(__unchecked: (), Cardinal(10))
+        )
+        #expect(a < b)
+    }
+
+    @Test("comparable — equal")
+    func comparableEqual() {
+        let a = Text.Location(
+            line: 5,
+            column: Text.Line.Column(__unchecked: (), Cardinal(10))
+        )
+        let b = Text.Location(
+            line: 5,
+            column: Text.Line.Column(__unchecked: (), Cardinal(10))
+        )
+        #expect(a == b)
+        #expect(!(a < b))
+    }
+
+    @Test("hashable")
+    func hashable() {
+        let a = Text.Location(
+            line: 1,
+            column: Text.Line.Column(__unchecked: (), Cardinal(1))
+        )
+        let b = Text.Location(
+            line: 1,
+            column: Text.Line.Column(__unchecked: (), Cardinal(1))
+        )
+        let set: Set<Text.Location> = [a, b]
+        #expect(set.count == 1)
+    }
+
+}
+
+// MARK: - Text.Line.Map
+
+@Suite("Text.Line.Map")
+struct TextLineMapTests {
+    /// Helper: scan a string into a line map.
+    private func lineMap(for string: Swift.String) -> Text.Line.Map {
+        Text.Line.Map(scanning: Array(string.utf8))
+    }
+
+    @Test("empty content — one line")
+    func emptyContent() {
+        let map = lineMap(for: "")
+        #expect(map.lineCount == 1)
+    }
+
+    @Test("single line — no newline")
+    func singleLineNoNewline() {
+        let map = lineMap(for: "hello")
+        #expect(map.lineCount == 1)
+        #expect(map.line(containing: 0) == 1)
+        #expect(map.line(containing: 4) == 1)
+    }
+
+    @Test("LF line endings")
+    func lfLineEndings() {
+        // "a\nb\nc"
+        let map = lineMap(for: "a\nb\nc")
+        #expect(map.lineCount == 3)
+        #expect(map.line(containing: 0) == 1) // 'a'
+        #expect(map.line(containing: 1) == 1) // '\n'
+        #expect(map.line(containing: 2) == 2) // 'b'
+        #expect(map.line(containing: 4) == 3) // 'c'
+    }
+
+    @Test("CR line endings")
+    func crLineEndings() {
+        // "a\rb\rc"
+        let map = lineMap(for: "a\rb\rc")
+        #expect(map.lineCount == 3)
+        #expect(map.line(containing: 0) == 1)
+        #expect(map.line(containing: 2) == 2)
+        #expect(map.line(containing: 4) == 3)
+    }
+
+    @Test("CRLF line endings")
+    func crlfLineEndings() {
+        // "a\r\nb\r\nc"
+        let map = lineMap(for: "a\r\nb\r\nc")
+        #expect(map.lineCount == 3)
+        #expect(map.line(containing: 0) == 1) // 'a'
+        #expect(map.line(containing: 3) == 2) // 'b'
+        #expect(map.line(containing: 6) == 3) // 'c'
+    }
+
+    @Test("trailing newline adds empty line")
+    func trailingNewline() {
+        let map = lineMap(for: "a\n")
+        #expect(map.lineCount == 2)
+    }
+
+    @Test("column computation — 1-based")
+    func columnComputation() {
+        // "abc\ndef"
+        let map = lineMap(for: "abc\ndef")
+        // 'a' at offset 0 → line 1, column 1
+        #expect(map.column(for: 0) == 1)
+        // 'c' at offset 2 → line 1, column 3
+        #expect(map.column(for: 2) == 3)
+        // 'd' at offset 4 → line 2, column 1
+        #expect(map.column(for: 4) == 1)
+        // 'f' at offset 6 → line 2, column 3
+        #expect(map.column(for: 6) == 3)
+    }
+
+    @Test("location composition")
+    func locationComposition() {
+        // "abc\ndef"
+        let map = lineMap(for: "abc\ndef")
+        let location = map.location(for: 6) // 'f'
+        #expect(location.line == 2)
+        #expect(location.column == 3)
+        #expect(location.description == "2:3")
+    }
+
+    @Test("offset for line — valid")
+    func offsetForLineValid() {
+        // "abc\ndef"
+        let map = lineMap(for: "abc\ndef")
+        #expect(map.offset(forLine: 1) == 0)
+        #expect(map.offset(forLine: 2) == 4)
+    }
+
+    @Test("offset for line — out of range")
+    func offsetForLineOutOfRange() {
+        let map = lineMap(for: "abc")
+        #expect(map.offset(forLine: 0) == nil)
+        #expect(map.offset(forLine: 2) == nil)
+    }
+
+    @Test("mixed line endings")
+    func mixedLineEndings() {
+        // "a\nb\rc\r\nd"
+        let map = lineMap(for: "a\nb\rc\r\nd")
+        #expect(map.lineCount == 4)
+        #expect(map.line(containing: 0) == 1) // 'a'
+        #expect(map.line(containing: 2) == 2) // 'b'
+        #expect(map.line(containing: 4) == 3) // 'c'
+        #expect(map.line(containing: 7) == 4) // 'd'
+    }
+}

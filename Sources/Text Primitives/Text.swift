@@ -20,6 +20,9 @@
 /// - ``Text/Offset``: A signed byte displacement (`Tagged<Text, Affine.Discrete.Vector>`).
 /// - ``Text/Count``: A non-negative byte quantity (`Tagged<Text, Cardinal>`).
 /// - ``Text/Range``: A half-open byte range within text.
+/// - ``Text/Location``: A human-readable line:column pair.
+/// - ``Text/Line``: Namespace for line-oriented types (``Text/Line/Number``,
+///   ``Text/Line/Column``, ``Text/Line/Map``).
 ///
 /// ## Design
 ///
