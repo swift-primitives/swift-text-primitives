@@ -399,7 +399,7 @@ All positions, ranges, and line maps assume UTF-8 byte sequences.
 The current `Package.swift` depends only on `swift-string-primitives`. To use `Tagged<Text, Ordinal>`, the following dependencies must be added:
 
 ```
-swift-identity-primitives    (tier 0, provides Tagged)
+swift-tagged-primitives    (tier 0, provides Tagged)
 swift-ordinal-primitives     (tier 4, provides Ordinal, Ordinal.Protocol)
 swift-cardinal-primitives    (tier 3, provides Cardinal, Cardinal.Protocol)
 ```
@@ -485,7 +485,7 @@ let offset = lineMap.offset(for: location)
 
 ### Swift Institute Infrastructure
 
-- `Tagged<Tag, RawValue>`: `/Users/coen/Developer/swift-primitives/swift-identity-primitives/Sources/Identity Primitives/Tagged.swift`
+- `Tagged<Tag, RawValue>`: `/Users/coen/Developer/swift-primitives/swift-tagged-primitives/Sources/Tagged Primitives/Tagged.swift`
 - `Ordinal`: `/Users/coen/Developer/swift-primitives/swift-ordinal-primitives/Sources/Ordinal Primitives Core/Ordinal.swift`
 - `Cardinal`: `/Users/coen/Developer/swift-primitives/swift-cardinal-primitives/Sources/Cardinal Primitives Core/Cardinal.swift`
 - `Index<T>`: `/Users/coen/Developer/swift-primitives/swift-index-primitives/Sources/Index Primitives Core/Index.swift`
